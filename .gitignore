@@ -1,0 +1,28 @@
+# Backend
+backend/vendor/
+backend/node_modules/
+backend/.env
+backend/storage/logs/*
+backend/storage/framework/cache/*
+backend/storage/framework/sessions/*
+backend/storage/framework/views/*
+backend/bootstrap/cache/*.php
+!.gitkeep
+
+# Frontend
+frontend/node_modules/
+frontend/.next/
+frontend/.env
+frontend/.env.local
+frontend/.env.*.local
+
+# Local backups / old apps (not part of web repo)
+frontend-plain-backup/
+
+# OS / IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.suo
+*.user

@@ -1,0 +1,29 @@
+:root {
+  --bg: #f3f5f7;
+  --panel: #ffffff;
+  --text: #1f2933;
+  --muted: #6b7280;
+  --border: #d1d5db;
+  --accent: #0f4c81;
+  --danger: #b42318;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+}
+
+button,
+input,
+select {
+  font: inherit;
+}

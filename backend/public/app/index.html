@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Web JMC Import</title>
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <h1>Web JMC Import</h1>
+      <p id="userLabel" class="muted">Checking session…</p>
+    </header>
+
+    <section id="accessDenied" class="panel hidden">
+      <p id="accessMessage">No access in Web JMC Import</p>
+    </section>
+
+    <section id="importPanel" class="panel hidden">
+      <label for="groupSelect">Group</label>
+      <select id="groupSelect"></select>
+
+      <label for="excelFile">Drawing list Excel (.xlsx)</label>
+      <input id="excelFile" type="file" accept=".xlsx">
+
+      <button id="importBtn" type="button">Import</button>
+
+      <h2>Log</h2>
+      <pre id="logBox" class="log"></pre>
+    </section>
+  </main>
+
+  <script>
+    // Prefer XAMPP same-origin; override if needed.
+    window.WEB_JMC_API_BASE = window.WEB_JMC_API_BASE || '/webJmcImport/api';
+    window.KDT_LOGIN_URL = window.KDT_LOGIN_URL || '/KDTPortalLogin/';
+    window.WEBJMR_JMC_URL = window.WEBJMR_JMC_URL || '/webJMR/JMC';
+  </script>
+  <script src="js/api.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/import.js"></script>
+</body>
+</html>
