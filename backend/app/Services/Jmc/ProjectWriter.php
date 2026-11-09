@@ -24,7 +24,7 @@ class ProjectWriter
             $buic = trim($row[ExcelHeaders::BUDGET_IN_CHARGE] ?? '');
             if ($order !== '' || $buic !== '') {
                 $orderNumber = $order;
-                $buInCharge = $buic === 'CM' ? 'CEM' : $buic;
+                $buInCharge = JmcProjectFields::normalizeBudget($buic);
                 break;
             }
         }
@@ -73,5 +73,51 @@ class ProjectWriter
         }
 
         return $query->first();
+    }
+
+    /**
+     * Insert a project when this group does not already have it.
+     * Existing projects are left unchanged.
+     *
+     * @param  list<array<string, string>>  $rows
+     * @return array{id: string, created: bool}|null Null when a built-in project row is missing.
+     */
+    public function ensure(string $project, string $group, array $rows): ?array
+    {
+        $existing = $this->findProject($group, $project);
+        if ($existing !== null) {
+            return ['id' => (string) $existing->fldID, 'created' => false];
+        }
+
+        if (ExcelHeaders::isProjectDefault($project)) {
+            return null;
+        }
+
+        $orderNumber = '';
+        $buInCharge = '';
+        foreach ($rows as $row) {
+            $order = trim($row[ExcelHeaders::ORDER_NUMBER] ?? '');
+            $buic = trim($row[ExcelHeaders::BUDGET_IN_CHARGE] ?? '');
+            if ($order !== '' || $buic !== '') {
+                $orderNumber = $order;
+                $buInCharge = JmcProjectFields::normalizeBudget($buic);
+                break;
+            }
+        }
+
+        $maxPrio = DB::connection('webjmr')->table(self::TABLE)
+            ->where('fldGroup', $group)
+            ->max('fldPriority');
+        $prio = $maxPrio === null ? 1 : ((int) $maxPrio) + 1;
+
+        $id = DB::connection('webjmr')->table(self::TABLE)->insertGetId([
+            'fldProject' => $project,
+            'fldGroup' => $group,
+            'fldBUIC' => $buInCharge === '' ? null : $buInCharge,
+            'fldOrder' => $orderNumber === '' ? null : $orderNumber,
+            'fldPriority' => $prio,
+        ]);
+
+        return ['id' => (string) $id, 'created' => true];
     }
 }

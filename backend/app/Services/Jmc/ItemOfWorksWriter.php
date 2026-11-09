@@ -113,4 +113,41 @@ class ItemOfWorksWriter
 
         return $map;
     }
+
+    /**
+     * Insert an item of works when this project and group do not already have it.
+     * Existing items are left unchanged. Matching is case-insensitive.
+     */
+    public function ensure(string $projectId, string $group, string $itemOfWork): ?string
+    {
+        $itemOfWork = trim($itemOfWork);
+        if ($itemOfWork === '') {
+            return null;
+        }
+
+        $existing = DB::connection('webjmr')->table(self::TABLE)
+            ->where('fldProject', $projectId)
+            ->where('fldGroup', $group)
+            ->where('fldDelete', 0)
+            ->whereRaw('LOWER(fldItem) = ?', [mb_strtolower($itemOfWork)])
+            ->first();
+
+        if ($existing !== null) {
+            return (string) $existing->fldID;
+        }
+
+        $maxPrio = DB::connection('webjmr')->table(self::TABLE)
+            ->where('fldProject', $projectId)
+            ->max('fldPriority');
+        $prio = $maxPrio === null ? 1 : ((int) $maxPrio) + 1;
+
+        $id = DB::connection('webjmr')->table(self::TABLE)->insertGetId([
+            'fldProject' => $projectId,
+            'fldGroup' => $group,
+            'fldItem' => $itemOfWork,
+            'fldPriority' => $prio,
+        ]);
+
+        return (string) $id;
+    }
 }

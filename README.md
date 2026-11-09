@@ -111,11 +111,12 @@ npm start
 5. **Sign in** via the shared KDT / Web JMR login if prompted  
    (this app does **not** have its own login/logout page)
 6. On the import screen:
+   - Download the Excel template, or use an existing drawing list
    - Choose your **Group**
-   - Select a **`.xlsx`** drawing-list file
-   - Click **Import**
-7. Watch the log panel for success / errors  
-   On success, Web JMR JMC may open in a new tab (`WEBJMR_JMC_URL`)
+   - Select a **`.xlsx`** file and click **Validate & Preview**
+   - Confirm the import when the preview shows the new rows
+7. New rows are inserted into Web JMR. Existing JMC rows are left unchanged.
+   Daily Report reads `projectstable`, `itemofworkstable`, and `drawingreference` directly, so a new active row is available there after the import commits.
 
 ### Who can import?
 
@@ -142,7 +143,13 @@ Base URL (local XAMPP): `http://localhost/webJmcImport/api`
 |--------|------|------|---------|
 | `GET` | `/health` | none | Health / DB ping |
 | `GET` | `/me` | `userID` cookie | Current user, groups, `canImport` |
-| `POST` | `/jmc/import` | cookie + import permission | Upload `.xlsx` + `group` |
+| `GET` | `/jmc/template` | cookie + import permission | Download a blank `.xlsx` template |
+| `POST` | `/jmc/preview` | cookie + import permission | Validate `.xlsx` + `group` and return a preview |
+| `GET` | `/jmc/preview/{token}` | cookie + import permission | Paged preview (`filter`, `q`, `page`) |
+| `GET` | `/jmc/preview/{token}/errors` | cookie + import permission | Excel error report |
+| `POST` | `/jmc/preview/{token}/confirm` | cookie + import permission | Insert new rows only |
+| `GET` | `/jmc/history` | cookie + import permission | Import history for the user's groups |
+| `POST` | `/jmc/import` | cookie + import permission | Legacy one-step import used by the plain HTML page |
 
 `POST /jmc/import` form fields:
 

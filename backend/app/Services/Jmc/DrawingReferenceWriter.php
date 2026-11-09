@@ -45,23 +45,7 @@ class DrawingReferenceWriter
                 continue;
             }
 
-            // Empty Excel cells must be NULL for int/date columns (strict MySQL),
-            // matching how loose desktop inserts effectively coerced blanks.
-            $payload = [
-                'fldNoSheets' => DbValue::nullableInt($row[ExcelHeaders::NUMBER_OF_SHEET] ?? null),
-                'fldPaperSize' => DbValue::nullableString($row[ExcelHeaders::PAPER_SIZE] ?? null),
-                'fldDrawingName' => DbValue::nullableString($row[ExcelHeaders::DOCUMENT_NAME] ?? null),
-                'fldJob' => $jobDescription,
-                'fldKHIDate' => DbValue::nullableDate($row[ExcelHeaders::KHI_REQUESTED_DATE] ?? null),
-                'fldKHIC' => DbValue::nullableString($row[ExcelHeaders::KHI_IN_CHARGE] ?? null),
-                'fldKHIDeadline' => DbValue::nullableDate($row[ExcelHeaders::KHI_DEADLINE] ?? null),
-                'fldKDTDeadline' => DbValue::nullableDate($row[ExcelHeaders::KDT_DEADLINE] ?? null),
-                'fldExpectedMH' => DbValue::nullableInt($row[ExcelHeaders::EXPECTED_MANHOUR] ?? null) ?? 0,
-            ];
-
-            if (array_key_exists(ExcelHeaders::KHI_PREP, $row)) {
-                $payload['fldKHIPrep'] = DbValue::nullableInt($row[ExcelHeaders::KHI_PREP] ?? null) ?? 0;
-            }
+            $payload = $this->attributes($row, $jobDescription);
 
             $query = DB::connection('webjmr')->table(self::TABLE)
                 ->where('fldGroup', $group)
@@ -108,5 +92,82 @@ class DrawingReferenceWriter
         }
 
         return true;
+    }
+
+    /**
+     * Insert a job request when the same project, item, group, and description
+     * are not already stored. Existing rows are not updated.
+     *
+     * @param  array<string, string>  $row
+     */
+    public function insertIfAbsent(
+        string $projectId,
+        string $group,
+        string $projectName,
+        ?string $itemOfWorkId,
+        array $row,
+    ): bool {
+        $jobDescription = trim($row[ExcelHeaders::DESCRIPTION] ?? '');
+        $isDefault = ExcelHeaders::isProjectDefault($projectName);
+        $payload = $this->attributes($row, $jobDescription);
+
+        $query = DB::connection('webjmr')->table(self::TABLE)
+            ->where('fldGroup', $group)
+            ->where('fldProject', $projectId)
+            ->where('fldJob', $jobDescription)
+            ->where('fldDelete', 0);
+
+        if ($isDefault) {
+            $query->whereNull('fldItem');
+        } else {
+            $query->where('fldItem', $itemOfWorkId);
+        }
+
+        if ($query->first() !== null) {
+            return false;
+        }
+
+        $prioQuery = DB::connection('webjmr')->table(self::TABLE);
+        if ($isDefault) {
+            $prioQuery->whereNull('fldItem');
+        } else {
+            $prioQuery->where('fldItem', $itemOfWorkId);
+        }
+        $maxPrio = $prioQuery->max('fldPriority');
+        $prio = $maxPrio === null ? 1 : ((int) $maxPrio) + 1;
+
+        DB::connection('webjmr')->table(self::TABLE)->insert(array_merge($payload, [
+            'fldProject' => $projectId,
+            'fldGroup' => $group,
+            'fldItem' => $isDefault ? null : $itemOfWorkId,
+            'fldPriority' => $prio,
+        ]));
+
+        return true;
+    }
+
+    /**
+     * @param  array<string, string>  $row
+     * @return array<string, mixed>
+     */
+    private function attributes(array $row, string $jobDescription): array
+    {
+        $payload = [
+            'fldNoSheets' => DbValue::nullableInt($row[ExcelHeaders::NUMBER_OF_SHEET] ?? null),
+            'fldPaperSize' => DbValue::nullableString($row[ExcelHeaders::PAPER_SIZE] ?? null),
+            'fldDrawingName' => DbValue::nullableString($row[ExcelHeaders::DOCUMENT_NAME] ?? null),
+            'fldJob' => $jobDescription,
+            'fldKHIDate' => DbValue::nullableDate($row[ExcelHeaders::KHI_REQUESTED_DATE] ?? null),
+            'fldKHIC' => DbValue::nullableString($row[ExcelHeaders::KHI_IN_CHARGE] ?? null),
+            'fldKHIDeadline' => DbValue::nullableDate($row[ExcelHeaders::KHI_DEADLINE] ?? null),
+            'fldKDTDeadline' => DbValue::nullableDate($row[ExcelHeaders::KDT_DEADLINE] ?? null),
+            'fldExpectedMH' => DbValue::nullableInt($row[ExcelHeaders::EXPECTED_MANHOUR] ?? null) ?? 0,
+        ];
+
+        if (array_key_exists(ExcelHeaders::KHI_PREP, $row)) {
+            $payload['fldKHIPrep'] = DbValue::nullableInt($row[ExcelHeaders::KHI_PREP] ?? null) ?? 0;
+        }
+
+        return $payload;
     }
 }

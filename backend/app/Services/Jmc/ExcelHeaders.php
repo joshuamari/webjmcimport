@@ -61,6 +61,8 @@ class ExcelHeaders
             'TRAINING',
             'DEVELOPMENT, ANALYSIS & IT',
             'BUSINESS TRIP & OTHER',
+            'Instructions',
+            'Example',
         ];
     }
 
@@ -115,5 +117,40 @@ class ExcelHeaders
         }
 
         return true;
+    }
+
+    /**
+     * @param  list<string>  $headers
+     * @return list<string>
+     */
+    public static function missingHeaders(array $headers): array
+    {
+        $missing = [];
+        foreach (self::baseList() as $required) {
+            if (! in_array($required, $headers, true)) {
+                $missing[] = $required;
+            }
+        }
+
+        return $missing;
+    }
+
+    public static function columnKind(string $header): string
+    {
+        return match ($header) {
+            self::KHI_REQUESTED_DATE, self::KHI_DEADLINE, self::KDT_DEADLINE => 'date',
+            self::NUMBER_OF_SHEET, self::EXPECTED_MANHOUR, self::KHI_PREP => 'int',
+            default => 'text',
+        };
+    }
+
+    public static function maxLength(string $header): ?int
+    {
+        return match ($header) {
+            self::PAPER_SIZE => 2,
+            self::ORDER_NUMBER, self::BUDGET_IN_CHARGE, self::ITEM_OF_WORKS,
+            self::DOCUMENT_NAME, self::DESCRIPTION, self::KHI_IN_CHARGE => 100,
+            default => null,
+        };
     }
 }
