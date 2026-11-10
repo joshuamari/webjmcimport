@@ -21,8 +21,20 @@
 }
 
 .titleWrap {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
   max-width: 100%;
+  min-width: 0;
+}
+
+.brandLogo {
+  display: block;
+  width: auto;
+  height: 32px;
+  object-fit: contain;
+  flex: 0 0 auto;
 }
 
 .pageTitle {
@@ -1236,6 +1248,14 @@
     padding: 8px 64px 8px 18px;
     font-size: 28px;
   }
+
+  .brandLogo {
+    height: 28px;
+  }
+
+  .titleWrap {
+    gap: 8px;
+  }
 }
 
 @media (max-width: 420px) {
@@ -1243,6 +1263,10 @@
     min-height: 46px;
     padding: 8px 52px 8px 14px;
     font-size: 24px;
+  }
+
+  .brandLogo {
+    height: 28px;
   }
 
   .dialog {
