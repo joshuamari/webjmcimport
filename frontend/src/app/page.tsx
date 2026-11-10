@@ -1,7 +1,9 @@
 'use client';
 
 import { DragEvent, Fragment, KeyboardEvent, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
+import Image from 'next/image';
 import { AlertTriangle, ArrowLeft, ChevronDown, ChevronRight, Download, FileClock, Info, Search, Upload } from 'lucide-react';
+import webJmrLogo from './web-jmr-logo.png';
 import {
   confirmImport,
   downloadErrorReport,
@@ -633,6 +635,14 @@ export default function HomePage() {
       {user && user.canImport ? (
         <>
           <div className={styles.titleWrap}>
+            <Image
+              src={webJmrLogo}
+              alt="Web JMR logo"
+              priority
+              unoptimized
+              draggable={false}
+              className={styles.brandLogo}
+            />
             <h1 className={styles.pageTitle}>JMC Import</h1>
           </div>
           <p className={styles.lead}>Add new Job Manhour Category (JMC) records to Web JMR.</p>
