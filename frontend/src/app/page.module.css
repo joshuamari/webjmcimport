@@ -13,6 +13,13 @@
   color: #26333d;
 }
 
+.pageHead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
 .titleWrap {
   display: inline-flex;
   max-width: 100%;
@@ -1217,6 +1224,11 @@
 
   .progress {
     flex-wrap: wrap;
+  }
+
+  .pageHead {
+    align-items: flex-start;
+    flex-direction: column;
   }
 
   .pageTitle {

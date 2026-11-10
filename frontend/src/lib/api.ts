@@ -238,3 +238,7 @@ export function downloadErrorReport(token: string) {
 export function getLoginUrl() {
   return process.env.NEXT_PUBLIC_KDT_LOGIN_URL || 'http://localhost/KDTPortalLogin/';
 }
+
+export function getJmcUrl() {
+  return process.env.NEXT_PUBLIC_WEBJMR_JMC_URL || '/webJMR/JMC';
+}

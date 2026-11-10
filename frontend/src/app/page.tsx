@@ -8,6 +8,7 @@ import {
   downloadTemplate,
   getHistory,
   getHistoryDetail,
+  getJmcUrl,
   getLoginUrl,
   getMe,
   getPreview,
@@ -632,8 +633,13 @@ export default function HomePage() {
 
       {user && user.canImport ? (
         <>
-          <div className={styles.titleWrap}>
-            <h1 className={styles.pageTitle}>JMC Import</h1>
+          <div className={styles.pageHead}>
+            <div className={styles.titleWrap}>
+              <h1 className={styles.pageTitle}>JMC Import</h1>
+            </div>
+            <button type="button" className={styles.outline} onClick={() => { window.location.href = getJmcUrl(); }}>
+              Go to JMC
+            </button>
           </div>
           <p className={styles.lead}>Add new Job Manhour Category (JMC) records to Web JMR.</p>
 
